@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI-Powered RAG Q&A System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+            background:
+                linear-gradient(135deg,#dbeafe,#eef2ff,#f8fafc);
+            color: #1e293b;
+            padding: 30px;
+        }
+        .container {
+            max-width: 950px;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 36px;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow:
+                0 10px 30px
+                rgba(15, 23, 42, 0.08);
+        }
+        .card h2 {
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+        .upload-area {
+            border: 2px dashed #93c5fd;
+            border-radius: 15px;
+            padding: 35px;
+            text-align: center;
+            background: #eff6ff;
+            margin-bottom: 20px;
+        }
+  .upload-icon {
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+        .upload-area p {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 22px;
+            background:
+                linear-gradient(135deg,#2563eb,#4f46e5);
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow:0 6px 15px rgba(37, 99, 235, 0.3);
+        }
+        .clear-button {
+            background: #ef4444;
+        }
+        .clear-button:hover {
+            box-shadow: 0 6px 15px   rgba(239, 68, 68, 0.3);
+        }
+#uploadStatus {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .question-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #question {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+        }
+        #question:focus {
+            border-color: #2563eb;
+            box-shadow:0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .chat-box {
+            margin-top: 20px;
+            max-height: 450px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 15px;
+            background: #f8fafc;
+        }
+        .welcome-message {
+            text-align: center;
+            color: #64748b;
+            padding: 25px;
+        }
+        .user-message {
+            background: #2563eb;
+            color: white;
+            padding: 12px 16px;
+            border-radius:15px 15px 3px 15px;
+            margin:12px 0 12px auto;
+            max-width: 75%;
+            width: fit-content;
+            line-height: 1.5;
+        }
+        .ai-message {
+            background: #e2e8f0;
+            color: #1e293b;
+            padding: 12px 16px;
+            border-radius:15px 15px 15px 3px;
+            margin:12px auto 12px 0;
+            max-width: 75%;
+            width: fit-content;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 14px;
+        }
+        @media (max-width: 700px) {
+            body {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 28px;
+            }
+            .card {
+                padding: 20px;
+            }
+            .question-area {
+                flex-direction: column;
+            }
+            .question-area button {
+                width: 100%;
+            }
+            .user-message,
+            .ai-message {
+                max-width: 90%;
+            }
+
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+ <div class="header">
+        <h1> 📚 AI-Powered RAG Q&A System</h1>
+        <p> Upload a document and ask questions using AI </p>
+    </div>
+    <div class="card">
+        <h2>📄 Upload Document</h2>
+        <div class="upload-area">
+            <div class="upload-icon">📑</div>
+            <p> Upload a PDF document to start asking questions</p>
+            <input type="file" id="pdfFiles" accept=".pdf" multiple>
+            <div id="selectedFiles"></div>
+            <button onclick="uploadPDFs()">⬆️ Upload PDFs </button>
+        </div>
+        <p id="uploadStatus"></p>
+    </div>
+    <div class="card">
+    <h2>💬 Ask Questions</h2>
+        <div class="question-area">
+            <input type="text" id="question" placeholder="Ask something about your document..."onkeydown="handleEnter(event)">
+            <button onclick="askQuestion()">🚀 Ask</button>
+        </div>
+        <button class="clear-button" onclick="clearChat()">🗑️ Clear Chat</button>
+        <div id="chatBox" class="chat-box">
+            <div class="welcome-message">
+                🤖 Ask a question about your uploaded document.
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <p>AI-Powered RAG Q&A System</p>
+        <p>Built with FastAPI • ChromaDB • Gemini • Python</p>
+    </div>
+</div>
+<script>
+    document.getElementById("pdfFiles").addEventListener("change", function () {
+    const files = this.files;
+    const selectedFiles = document.getElementById("selectedFiles");
+    selectedFiles.innerHTML = "";
+    if (files.length === 0) {
+        return;
+    }
+    const title = document.createElement("p");
+    title.innerText = "📄 Selected PDFs:";
+    selectedFiles.appendChild(title);
+    for (let i = 0; i < files.length; i++) {
+        const fileName = document.createElement("div");
+        fileName.innerText =
+            "📄 " + (i + 1) + ". " + files[i].name;
+        selectedFiles.appendChild(fileName);
+    }
+});
+  async function uploadPDFs() {
+    const fileInput =
+        document.getElementById("pdfFiles");
+    const status =
+        document.getElementById("uploadStatus");
+    if (fileInput.files.length === 0) {
+        status.innerText ="⚠️ Please select at least one PDF.";
+        return;
+    }
+    const files = Array.from(fileInput.files);
+    status.innerText ="⏳ Uploading and processing " +files.length +" PDF(s)...";
+    let successful = 0;
+    for (const file of files) {
+        if (!file.name.toLowerCase().endsWith(".pdf")) {
+            status.innerText ="❌ " + file.name +" is not a PDF.";
+            continue;
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        try {
+            const response =
+                await fetch(
+                    "http://127.0.0.1:8000/upload",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+            const data =await response.json();
+            if (data.error) {
+                console.error(file.name + ": " + data.error);
+                continue;
+            }
+            successful++;
+            status.innerText ="⏳ Uploaded " +successful +" of " +files.length +" PDF(s)...";
+        }
+        catch (error) {
+            console.error("Error uploading " +file.name, error
+            );
+        }
+    }
+    status.innerText ="✅ " +successful +" of " +files.length +" PDF(s) uploaded successfully!";
+    fileInput.value = "";
+}
+    async function askQuestion() {
+        const questionInput =
+            document.getElementById("question");
+        const chatBox =
+            document.getElementById("chatBox");
+        const question =
+            questionInput.value.trim();
+        if (question === "") {
+            return;
+        }
+        const welcome =chatBox.querySelector(".welcome-message");
+        if (welcome) {
+            welcome.remove();
+        }
+        const userMessage =document.createElement("div");
+        userMessage.className ="user-message";
+        userMessage.innerText ="👤 " + question;
+        chatBox.appendChild(userMessage);
+        questionInput.value = "";
+        const aiMessage =document.createElement("div");
+        aiMessage.className ="ai-message";
+        aiMessage.innerText ="⏳ Thinking...";
+        chatBox.appendChild(aiMessage );
+        chatBox.scrollTop =chatBox.scrollHeight;
+        try {
+            const response =
+                await fetch("http://127.0.0.1:8000/ask?question=" +encodeURIComponent(question));
+            const data =await response.json();
+            aiMessage.innerText ="🤖 " + data.answer;
+        }
+        catch (error) {
+            aiMessage.innerText ="❌ Error connecting to the backend.";
+            console.error(error);
+        }
+        chatBox.scrollTop =chatBox.scrollHeight;
+    }
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            askQuestion();
+        }
+    }
+    function clearChat() {
+        const chatBox =
+            document.getElementById("chatBox");
+        chatBox.innerHTML = `
+            <div class="welcome-message"> 🤖 Ask a question about your uploaded document. </div>
+        `;}
+</script>
+</body>
+</html>
