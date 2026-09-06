@@ -211,6 +211,7 @@
     </div>
 </div>
 <script>
+    const API_URL = "https://ai-rag-document.onrender.com";
     document.getElementById("pdfFiles").addEventListener("change", function () {
     const files = this.files;
     const selectedFiles = document.getElementById("selectedFiles");
@@ -250,7 +251,7 @@
         try {
             const response =
                 await fetch(
-                    "http://127.0.0.1:8000/upload",
+                    `${API_URL}/upload`,
                     {
                         method: "POST",
                         body: formData
@@ -298,7 +299,7 @@
         chatBox.scrollTop =chatBox.scrollHeight;
         try {
             const response =
-                await fetch("http://127.0.0.1:8000/ask?question=" +encodeURIComponent(question));
+                await fetch(`${API_URL}/ask?question=${encodeURIComponent(question)}`);
             const data =await response.json();
             aiMessage.innerText ="🤖 " + data.answer;
         }
