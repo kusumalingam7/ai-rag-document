@@ -1,11 +1,23 @@
-from sentence_transformers import SentenceTransformer
+import os
+from dotenv import load_dotenv
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
+load_dotenv()
 
-# Load the embedding model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Gemini embedding model
+embeddings_model = GoogleGenerativeAIEmbeddings(
+    model="gemini-embedding-001",
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
 
 
 def create_embeddings(chunks):
-    embeddings = model.encode(chunks)
+    embeddings = embeddings_model.embed_documents(chunks)
 
     return embeddings
+
+
+def create_query_embedding(question):
+    embedding = embeddings_model.embed_query(question)
+
+    return embedding
